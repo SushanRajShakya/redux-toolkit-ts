@@ -12,16 +12,17 @@ export enum TodoStatus {
 }
 
 export interface Todo {
+  id: number;
   title: string;
   status: TodoStatus;
 }
 
 export const addTodo = createActionWithPayload<string>(TodoActions.ADD_TODO);
 
-export const removeTodo = createActionWithPayload<string>(
+export const removeTodo = createActionWithPayload<number>(
   TodoActions.REMOVE_TODO
 );
 
-export const updateTodo = createActionWithPayload<Todo>(
+export const updateTodo = createActionWithPayload<number>(
   TodoActions.UPDATE_TODO
 );

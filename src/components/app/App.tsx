@@ -1,5 +1,6 @@
 import { ChangeEventHandler, useState } from 'react';
 
+import { List } from '../list';
 import { ReactAppDispatch } from '../../common';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import {
@@ -10,6 +11,14 @@ import {
   TodoStatus,
   updateTodo,
 } from '../../state';
+import {
+  ADD_TODO,
+  APP_TITLE,
+  COMPLETED,
+  MANAGE_TODOS,
+  PENDING,
+  REMOVE,
+} from '../../constants';
 
 import './App.scss';
 
@@ -23,53 +32,40 @@ export const App: React.FC = () => {
 
   return (
     <div>
-      <h1>Todo App</h1>
+      <h1>{APP_TITLE}</h1>
       <input value={todo} onChange={_handleChange(setTodo)} />
-      <button onClick={_addTodo(dispatch, todo, setTodo)}>Add Todo</button>
+      <button
+        onClick={_addTodo(dispatch, todo, setTodo)}
+        disabled={todo === ''}
+      >
+        {ADD_TODO}
+      </button>
       <br />
       <br />
       {!!todoList?.length && (
         <>
           <hr />
-          <h2>Todo List</h2>
+          <h2>{MANAGE_TODOS}</h2>
           <ul className="checkbox">
-            {todoList.map((item) => (
-              <li key={item.title}>
+            {todoList.map((item: Todo) => (
+              <li key={item.id}>
                 <input
                   checked={item.status === TodoStatus.COMPLETED}
                   type="checkbox"
                   name="todo"
-                  onChange={_changeStatus(item, dispatch)}
+                  onChange={_changeStatus(item.id, dispatch)}
                 />
                 {item.title}
-                <button onClick={_removeTodo(item.title, dispatch)}>
-                  Remove
+                <button onClick={_removeTodo(item.id, dispatch)}>
+                  {REMOVE}
                 </button>
               </li>
             ))}
           </ul>
           <hr />
           <div className="flex-container">
-            <div>
-              <h2>Pending</h2>
-              <ul>
-                {!!pendingTodos.length
-                  ? pendingTodos.map((todo) => (
-                      <li key={todo.title}>{todo.title}</li>
-                    ))
-                  : 'No pending todos'}
-              </ul>
-            </div>
-            <div>
-              <h2>Completed</h2>
-              <ul>
-                {!!completedTodos.length
-                  ? completedTodos.map((todo) => (
-                      <li key={todo.title}>{todo.title}</li>
-                    ))
-                  : 'No completed todos'}
-              </ul>
-            </div>
+            <List title={PENDING} list={pendingTodos} />
+            <List title={COMPLETED} list={completedTodos} />
           </div>
         </>
       )}
@@ -90,20 +86,12 @@ const _addTodo =
     setTodo('');
   };
 
-const _changeStatus = (todo: Todo, dispatch: StoreDispatch) => (): void => {
-  dispatch(
-    updateTodo({
-      ...todo,
-      status:
-        todo.status === TodoStatus.COMPLETED
-          ? TodoStatus.PENDING
-          : TodoStatus.COMPLETED,
-    })
-  );
+const _changeStatus = (id: number, dispatch: StoreDispatch) => (): void => {
+  dispatch(updateTodo(id));
 };
 
-const _removeTodo = (title: string, dispatch: StoreDispatch) => (): void => {
-  dispatch(removeTodo(title));
+const _removeTodo = (id: number, dispatch: StoreDispatch) => (): void => {
+  dispatch(removeTodo(id));
 };
 
 const _filterTodoList = (todoList: Todo[], status: TodoStatus): Todo[] =>
